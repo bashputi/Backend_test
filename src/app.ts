@@ -6,7 +6,7 @@ app.use(express.json());
 
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Hello Wr')
+    res.send('Hello Wrold')
   })
 
 export default app;
