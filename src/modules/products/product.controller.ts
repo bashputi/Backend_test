@@ -29,10 +29,23 @@ const getProduct = async (req: Request, res: Response) => {
     });
 };
 
+const putProduct = async (req: Request, res: Response) => {
+   const { productId } = req.params;
+   const updateData = req.body;
+    const updatedProduct = await productService.putProduct(productId, updateData);
+    res.json({
+        success: true,
+        message: "Product updated successfully!",
+        data: updatedProduct,
+    });
+  
+};
+
 
 
 export const productController = {
     createProduct,
     getProducts,
     getProduct,
+    putProduct,
 }

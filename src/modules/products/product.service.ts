@@ -12,10 +12,14 @@ const getProducts = async() => {
 };
 
 const getProduct = async(id: string) => {
-    console.log(id)
     const result = await Product.findOne({_id : id});
-    console.log(result)
     return result;
+};
+
+const putProduct = async(id: string,  updateData: object) => {
+    await Product.updateOne({_id : id}, {$set: updateData});
+    const updatedProduct = await Product.findOne({ _id: id });
+    return updatedProduct;
 };
 
 
@@ -23,4 +27,5 @@ export const productService = {
     createProduct,
     getProducts,
     getProduct,
+    putProduct,
 };
