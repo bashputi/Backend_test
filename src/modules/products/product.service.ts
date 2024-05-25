@@ -22,10 +22,16 @@ const putProduct = async(id: string,  updateData: object) => {
     return updatedProduct;
 };
 
+const deleteProduct = async(id: string) => {
+    const deletedProduct = await Product.deleteOne({_id : id});
+    return deletedProduct;
+};
+
 
 export const productService = {
     createProduct,
     getProducts,
     getProduct,
     putProduct,
+    deleteProduct,
 };
