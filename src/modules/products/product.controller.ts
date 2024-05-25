@@ -80,7 +80,40 @@ const deleteProduct = async (req: Request, res: Response) => {
   
 };
 
+const searchProduct = async (req: Request, res: Response) => {
+    try {
+        // extract the searchTerm 
+        const {searchTerm } = req.query;
+        if (!searchTerm) {
+            res.json({
+                success: false,
+                message: 'search term required',
+               
+            });
+        } 
+        // search product with searchTerm 
+        const products = await productService.searchProduct(searchTerm as string);
+        // send response 
+        if (products.length > 0) {
+            res.json({
+                success: true,
+                message: `Products matching search term ${searchTerm} fetched successfully!`,
+                data: products,
+            });
+        } else {
+            res.json({
+                success: false,
+                message: "Product not found!",
+            });
+        }
+    } catch (error) {
+        res.json({
+            success: false,
+            message: "An error occurred!",
+        });
+    }
 
+};
 
 export const productController = {
     createProduct,
@@ -88,4 +121,5 @@ export const productController = {
     getProduct,
     putProduct,
     deleteProduct,
+    searchProduct
 }

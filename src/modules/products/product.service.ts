@@ -27,6 +27,18 @@ const deleteProduct = async(id: string) => {
     return deletedProduct;
 };
 
+const searchProduct = async ( searchTerm: string) => {
+    const searchTermRegex = new RegExp(searchTerm, 'i');
+    const products = await Product.aggregate([
+       {
+        $match: {
+            name: { $regex: searchTermRegex }
+        }
+       }
+    ]);
+    return products;
+}
+
 
 export const productService = {
     createProduct,
@@ -34,4 +46,5 @@ export const productService = {
     getProduct,
     putProduct,
     deleteProduct,
+    searchProduct
 };
