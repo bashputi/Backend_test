@@ -1,10 +1,23 @@
 import {orderService} from "./order.service";
-import { Request, Response} from 'express';
+import { NextFunction, Request, Response} from 'express';
 import {Product} from "../products/product.model";
+import orderSchema from "./jai.validator";
 
-const createOrder = async (req: Request, res: Response) => {
-    const { email, productId, quantity, price } = req.body;
+
+const createOrder = async (req: Request, res: Response, next: NextFunction) => {
+    
     try {
+        // joy validation 
+        const { error, value } = orderSchema.validate(req.body, { abortEarly: false });
+        if(error) {
+            res.json({
+                success: false,
+                message: "validation error",
+                details: error.details.map((detail: { message: any; }) => detail.message)
+            });
+        }
+        const { email, productId, quantity, price } = value;
+
         // find product by productId
         const product = await Product.findById(productId);
         if (!product) {
@@ -17,7 +30,7 @@ const createOrder = async (req: Request, res: Response) => {
         if (product.inventory.quantity < quantity) {
             return res.json({
                 success: false,
-                message: "Insufficient stock!",
+                message: "Insufficient quantity available in inventory",
             });
         }
         // calculate new quantity 
@@ -42,14 +55,12 @@ const createOrder = async (req: Request, res: Response) => {
         });
         
     } catch (error) {
-        res.json({
-            success: false,
-            message: "Server site error",
-        });
+       next(error)
     }
 };
 
-const getOrders = async (req: Request, res: Response) => {
+const getOrders = async (req: Request, res: Response, next: NextFunction) => {
+   try {
     const result = await orderService.getOrders();
     if (result) {
         res.json({
@@ -63,10 +74,14 @@ const getOrders = async (req: Request, res: Response) => {
             message: "Order not found!",
         });
     }
+   } catch (error) {
+    next(error)
+   }
 };
 
-const getOrder = async (req: Request, res: Response) => {
-   const { email } = req.query;
+const getOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.query;
     const result = await orderService.getOrder(email as string);
 if (result) {
     res.json({
@@ -80,6 +95,9 @@ if (result) {
         message: "Order not found!",
     });
 }
+  } catch (error) {
+    next(error)
+  }
 };
 
 

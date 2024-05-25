@@ -12,7 +12,7 @@ const getOrders = async() => {
 };
 
 const getOrder = async(email: string) => {
-    const result = await order.findOne({ email});
+    const result = await order.find({ email});
     return result;
 };
 

@@ -1,16 +1,34 @@
 import {productService} from "./product.service";
-import { Request, Response} from 'express';
+import { NextFunction, Request, Response} from 'express';
+import{ productSchema, updateProductSchema } from "./joi.validator";
 
-const createProduct = async (req: Request, res: Response) => {
-    const result = await productService.createProduct(req.body);
-    res.json({
-        success: true,
-        message: "Product created successfully!",
-        data: result,
-    });
+const createProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // joi validation 
+        const { error, value } = productSchema.validate(req.body, { abortEarly: false });
+        
+        if(error) {
+            res.json({
+                success: false,
+                message: "validation error",
+                details: error.details.map((detail: { message: any; }) => detail.message)
+            });
+        }
+
+        // create product after validation 
+        const result = await productService.createProduct(value);
+        res.json({
+            success: true,
+            message: "Product created successfully!",
+            data: result,
+        });
+    } catch (error: any) {
+        next(error)
+    } 
 };
 
-const getProducts = async (req: Request, res: Response) => {
+const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+try {
     const result = await productService.getProducts();
     if (result) {
         res.json({
@@ -24,10 +42,14 @@ const getProducts = async (req: Request, res: Response) => {
             message: "Product not found!",
         });
     }
+} catch (error) {
+    next(error)
+}
 };
 
-const getProduct = async (req: Request, res: Response) => {
-   const { productId } = req.params;
+const getProduct = async (req: Request, res: Response, next: NextFunction) => {
+try {
+    const { productId } = req.params;
     const result = await productService.getProduct(productId);
 if (result) {
     res.json({
@@ -41,29 +63,50 @@ if (result) {
         message: "Product not found!",
     });
 }
+} catch (error) {
+   next(error) 
+}
 };
 
-const putProduct = async (req: Request, res: Response) => {
-   const { productId } = req.params;
-   const updateData = req.body;
-    const updatedProduct = await productService.putProduct(productId, updateData);
-if (updatedProduct) {
-    res.json({
-        success: true,
-        message: "Product updated successfully!",
-        data: updatedProduct,
-    });
-}else {
-    res.json({
-        success: false,
-        message: "Product not found!",
-    });
-}
+const putProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { productId } = req.params;
+    const updateData = req.body;
+
+    // joi validation 
+    const { error, value } = updateProductSchema.validate(updateData, { abortEarly: false });
+
+    if (error) {
+        return res.json({
+            success: false,
+            message: "validation error",
+            details: error.details.map((detail: { message: any; }) => detail.message)
+        });
+    }
+
+    // update product after validation 
+     const updatedProduct = await productService.putProduct(productId, value);
+ if (updatedProduct) {
+     res.json({
+         success: true,
+         message: "Product updated successfully!",
+         data: updatedProduct,
+     });
+ }else {
+     res.json({
+         success: false,
+         message: "Product not found!",
+     });
+ }
+  } catch (error) {
+    next(error)
+  }
   
 };
 
-const deleteProduct = async (req: Request, res: Response) => {
-   const { productId } = req.params;
+const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { productId } = req.params;
     const deletedProduct = await productService.deleteProduct(productId);
    if (deletedProduct.deletedCount > 0) {
     res.json({
@@ -77,10 +120,12 @@ const deleteProduct = async (req: Request, res: Response) => {
         message: "Product not found!",
     });
    }
-  
+  } catch (error) {
+    next(error)
+  }
 };
 
-const searchProduct = async (req: Request, res: Response) => {
+const searchProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // extract the searchTerm 
         const {searchTerm } = req.query;
@@ -107,10 +152,7 @@ const searchProduct = async (req: Request, res: Response) => {
             });
         }
     } catch (error) {
-        res.json({
-            success: false,
-            message: "An error occurred!",
-        });
+        next(error)
     }
 
 };
