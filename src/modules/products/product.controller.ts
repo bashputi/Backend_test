@@ -8,7 +8,7 @@ const createProduct = async (req: Request, res: Response, next: NextFunction) =>
         const { error, value } = productSchema.validate(req.body, { abortEarly: false });
         
         if(error) {
-            res.json({
+            return res.json({
                 success: false,
                 message: "validation error",
                 details: error.details.map((detail: { message: any; }) => detail.message)
@@ -17,7 +17,7 @@ const createProduct = async (req: Request, res: Response, next: NextFunction) =>
 
         // create product after validation 
         const result = await productService.createProduct(value);
-        res.json({
+        return res.json({
             success: true,
             message: "Product created successfully!",
             data: result,
@@ -27,38 +27,18 @@ const createProduct = async (req: Request, res: Response, next: NextFunction) =>
     } 
 };
 
-const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-try {
-    const result = await productService.getProducts();
-    if (result) {
-        res.json({
-            success: true,
-            message: "Products fetched successfully!",
-            data: result,
-        });
-    }else{
-        res.json({
-            success: false,
-            message: "Product not found!",
-        });
-    }
-} catch (error) {
-    next(error)
-}
-};
-
 const getProduct = async (req: Request, res: Response, next: NextFunction) => {
 try {
     const { productId } = req.params;
     const result = await productService.getProduct(productId);
 if (result) {
-    res.json({
+   return res.json({
         success: true,
         message: "Products fetched successfully!",
         data: result,
     });
 }else{
-    res.json({
+    return res.json({
         success: false,
         message: "Product not found!",
     });
@@ -109,13 +89,13 @@ const deleteProduct = async (req: Request, res: Response, next: NextFunction) =>
     const { productId } = req.params;
     const deletedProduct = await productService.deleteProduct(productId);
    if (deletedProduct.deletedCount > 0) {
-    res.json({
+    return res.json({
         success: true,
         message: "Product deleted successfully!",
         data: null,
     });
    }else {
-    res.json({
+    return res.json({
         success: false,
         message: "Product not found!",
     });
@@ -130,23 +110,31 @@ const searchProduct = async (req: Request, res: Response, next: NextFunction) =>
         // extract the searchTerm 
         const {searchTerm } = req.query;
         if (!searchTerm) {
-            res.json({
-                success: false,
-                message: 'search term required',
-               
-            });
+            const result = await productService.getProducts();
+            if (result) {
+               return res.json({
+                    success: true,
+                    message: "Products fetched successfully!",
+                    data: result,
+                });
+            }else{
+                return res.json({
+                    success: false,
+                    message: "Product not found!",
+                });
+            }
         } 
         // search product with searchTerm 
         const products = await productService.searchProduct(searchTerm as string);
         // send response 
         if (products.length > 0) {
-            res.json({
+            return res.json({
                 success: true,
                 message: `Products matching search term ${searchTerm} fetched successfully!`,
                 data: products,
             });
         } else {
-            res.json({
+            return res.json({
                 success: false,
                 message: "Product not found!",
             });
@@ -159,7 +147,6 @@ const searchProduct = async (req: Request, res: Response, next: NextFunction) =>
 
 export const productController = {
     createProduct,
-    getProducts,
     getProduct,
     putProduct,
     deleteProduct,

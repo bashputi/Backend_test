@@ -10,7 +10,7 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
         // joy validation 
         const { error, value } = orderSchema.validate(req.body, { abortEarly: false });
         if(error) {
-            res.json({
+            return res.json({
                 success: false,
                 message: "validation error",
                 details: error.details.map((detail: { message: any; }) => detail.message)
@@ -59,50 +59,45 @@ const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const getOrders = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-    const result = await orderService.getOrders();
+const getOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+        const result = await orderService.getOrders();
+        if (result) {
+           return res.json({
+                success: true,
+                message: "Orders fetched successfully!",
+                data: result,
+            });
+        }else{
+            return res.json({
+                success: false,
+                message: "Order not found!",
+            });
+        }
+    }
+    const result = await orderService.getOrder(email as string);
     if (result) {
-        res.json({
+        return res.json({
             success: true,
-            message: "Orders fetched successfully!",
+            message: "Orders fetched successfully for user email!",
             data: result,
         });
     }else{
-        res.json({
+        return res.json({
             success: false,
             message: "Order not found!",
         });
     }
-   } catch (error) {
-    next(error)
-   }
-};
-
-const getOrder = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { email } = req.query;
-    const result = await orderService.getOrder(email as string);
-if (result) {
-    res.json({
-        success: true,
-        message: "Orders fetched successfully for user email!",
-        data: result,
-    });
-}else{
-    res.json({
-        success: false,
-        message: "Order not found!",
-    });
-}
-  } catch (error) {
-    next(error)
-  }
-};
+    } catch (error) {
+        next(error)
+    }
+    };
 
 
 export const orderController = {
     createOrder,
-    getOrders,
     getOrder,
 };

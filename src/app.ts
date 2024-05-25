@@ -8,6 +8,12 @@ app.use(express.json());
 app.use("/api", ProductRoutes);
 app.use("/api", OrderRoutes);
 
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello Wrold')
+  })
+
+export default app;
+
 // route not found error 
 app.use((req, res, next) => {
   res.json({
@@ -25,9 +31,3 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     err: err.message
   })
 });
-
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello Wrold')
-  })
-
-export default app;

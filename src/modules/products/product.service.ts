@@ -6,11 +6,6 @@ const createProduct = async(payLoad: TProduct) => {
     return result;
 };
 
-const getProducts = async() => {
-    const result = await Product.find();
-    return result;
-};
-
 const getProduct = async(id: string) => {
     const result = await Product.findOne({_id : id});
     return result;
@@ -27,6 +22,11 @@ const deleteProduct = async(id: string) => {
     return deletedProduct;
 };
 
+const getProducts = async() => {
+    const result = await Product.find();
+    return result;
+};
+
 const searchProduct = async ( searchTerm: string) => {
     const searchTermRegex = new RegExp(searchTerm, 'i');
     const products = await Product.aggregate([
@@ -37,7 +37,7 @@ const searchProduct = async ( searchTerm: string) => {
        }
     ]);
     return products;
-}
+};
 
 
 export const productService = {
